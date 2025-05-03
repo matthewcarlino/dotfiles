@@ -27,7 +27,7 @@ alias tmux="tmux -2 -f $HOME/.config/tmux/tmux.conf"
 alias ws="tmux new-session -s workspace -n config"
 alias wsa="tmux a -t workspace"
 
-alias tree="tree -I node_modules -I _opam -I _build"
+alias tree="tree -I node_modules -I vendor -I _opam -I _build"
 
 alias npmig="npm --prefix=$HOME/.local i -g"
 
