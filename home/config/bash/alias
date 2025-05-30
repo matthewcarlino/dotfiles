@@ -30,6 +30,7 @@ alias wsa="tmux a -t workspace"
 alias tree="tree -I node_modules -I vendor -I _opam -I _build"
 
 alias npmig="npm --prefix=$HOME/.local i -g"
+alias npmp="npm --prefix=$HOME/.local"
 
 # Add an "alert" alias for long running commands.  Use like so:
 #   sleep 10; alert

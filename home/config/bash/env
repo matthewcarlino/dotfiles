@@ -21,9 +21,15 @@ export EDITOR=vim
 export GOBIN=$HOME/.local/bin
 
 #  NPM Stuff
-export NVM_DIR="$HOME/.nvm"
-[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
+# export NVM_DIR="$HOME/.config/nvm"
+# [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
+# Bailed on nvm
 
 # opam env
-test -r $HOME/.opam/opam-init/env_hook.sh && . $HOME/.opam/opam-init/env_hook.sh > /dev/null 2> /dev/null || true
-test -r $HOME/.opam/opam-init/variables.sh && . $HOME/.opam/opam-init/variables.sh > /dev/null 2> /dev/null || true
+# test -r $HOME/.opam/opam-init/env_hook.sh && . $HOME/.opam/opam-init/env_hook.sh > /dev/null 2> /dev/null || true
+# test -r $HOME/.opam/opam-init/variables.sh && . $HOME/.opam/opam-init/variables.sh > /dev/null 2> /dev/null || true
+# will return to ocaml one day
+
+# python stuf
+PYTHONPATH="$PYTHONPATH:$(find $HOME/.local -path "*/python*/site-packages" -type d | tr '\n' ':' | sed 's/:$//')"
+export PYTHONPATH="$PYTHONPATH:$(find $HOME/.local -path "*/python*/dist-packages" -type d | tr '\n' ':' | sed 's/:$//')"

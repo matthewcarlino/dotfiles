@@ -2,14 +2,16 @@ vim9script
 
 g:mapleader = ','
 
+
 # TODO
 # - Select-mode?
 
+import "~/.config/vim/system.vim"
 import "~/.config/vim/pack.vim"
 # import "~/.config/vim/remap.vim"
 import "~/.config/vim/pops.vim"
-import "~/.config/vim/web.vim"
-import "~/.config/vim/ts.vim"
+# import "~/.config/vim/web.vim"
+# import "~/.config/vim/ts.vim"
 
 import "~/.config/vim/lsp.vim"
 import "~/.config/vim/color.vim"
@@ -29,7 +31,6 @@ set splitbelow
 set ttimeoutlen=0
 set timeoutlen=500
 set wildmenu
-set bg=dark
 set viminfo='0,<50,s10,h
 syntax on
 

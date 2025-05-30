@@ -3,7 +3,7 @@
 
 local module = {}
 
-function isLightMode()
+local function isLightMode()
     local output
     if Uname == 'Darwin' then
         -- TODO: Vibe coded darwin support - needs testing

@@ -2,57 +2,197 @@ vim9script
 
 # -yegappan/lsp
 # :h fold-commands for keybinding
-set keywordprg=:LspHover
-var lspServers = [
-    {
-        name: 'rustanalyzer',
-        filetype: ['rust'],
-        path: 'rust-analyzer',
-        args: [],
-        syncInit: v:true,
-        initializationOptions: {
-            inlayHints: {
-                typeHints: {
-                    enable: v:true
-                },
-                parameterHints: {
-                    enable: v:true
+# set keywordprg=:LspHover
+#
+
+# HTML/CSS
+def AddEmmetLsp(): void
+    var lspServers = [
+        {
+            filetype: ['html', 'css'],
+            path: 'emmet-language-server',
+            args: ['--stdio'],
+        }
+    ]
+    g:LspAddServer(lspServers)
+enddef
+au FileType html,css AddEmmetLsp()
+
+# HTML/CSS/JSON/ESLint (vscode-langservers-extracted)
+def AddHtmlLsp(): void
+    var lspServers = [
+        {
+            filetype: ['html'],
+            path: 'vscode-html-language-server',
+            args: ['--stdio'],
+        }
+    ]
+    g:LspAddServer(lspServers)
+enddef
+au FileType html AddHtmlLsp()
+
+def AddCssLsp(): void
+    var lspServers = [
+        {
+            filetype: ['css'],
+            path: 'vscode-css-language-server',
+            args: ['--stdio'],
+        }
+    ]
+    g:LspAddServer(lspServers)
+enddef
+au FileType css AddCssLsp()
+
+def AddJsonLsp(): void
+    var lspServers = [
+        {
+            filetype: ['json'],
+            path: 'vscode-json-language-server',
+            args: ['--stdio'],
+        }
+    ]
+    g:LspAddServer(lspServers)
+enddef
+au FileType json AddJsonLsp()
+
+def AddMdLsp(): void
+    var lspServers = [
+        {
+            filetype: ['markdown'],
+            path: 'vscode-md-language-server',
+            args: ['--stdio'],
+        }
+    ]
+    g:LspAddServer(lspServers)
+enddef
+au FileType markdown AddMdLsp()
+
+# Javascript, Typescript (Deno LSP)
+# def AddDenoLsp(): void
+#     var lspServers = [
+#         {
+#             filetype: ['javascript', 'typescript'],
+#             path: 'deno',
+#             args: ['lsp'],
+#             debug: true,
+#             initializationOptions: {
+#                 enable: true,
+#                 lint: true
+#             }
+#         }
+#     ]
+#     g:LspAddServer(lspServers)
+# enddef
+# au FileType typescript,javascript AddDenoLsp()
+
+def AddTsLsp(): void
+    var lspServers = [
+        {
+            name: 'tsserver',
+            filetype: ['javascript', 'typescript'],
+            path: 'typescript-language-server',
+            args: ['--stdio']
+        }
+    ]
+    g:LspAddServer(lspServers)
+enddef
+au FileType typescript,javascript AddTsLsp()
+
+# Rust
+def AddRustLsp(): void
+    var lspServers = [
+        {
+            filetype: ['rust'],
+            path: 'rust-analyzer',
+            args: [],
+            syncInit: v:true,
+            initializationOptions: {
+                inlayHints: {
+                    typeHints: {
+                        enable: v:true
+                    },
+                    parameterHints: {
+                        enable: v:true
+                    }
                 }
             }
         }
-    },
-    {
-        name: 'luals',
-        filetype: 'lua',
-        path: 'lua-language-server',
-        args: []
-    },
-    {
-        name: 'bashls',
-        filetype: 'sh',
-        path: 'bash-language-server',
-        args: ['start']
-    },
-    {
-        name: 'pylsp',
-        filetype: 'python',
-        path: 'pyls',
-        args: []
-    },
-    {
-        name: 'ocamllsp',
-        filetype: 'ocaml',
-        path: 'ocamllsp',
-        args: []
-    }
+    ]
+    g:LspAddServer(lspServers)
+enddef
+au FileType rust AddRustLsp()
 
-]
-g:LspAddServer(lspServers)
-# Can I set and unset options based on FileType?
-g:LspOptionsSet({
-    "snippetSupport": v:true, # this is just for emmet
-    "useQuickfixForLocations": v:true
-})
+# Lua
+def AddLuaLsp(): void
+    var lspServers = [
+        {
+            filetype: 'lua',
+            path: 'lua-language-server',
+            args: []
+        }
+    ]
+    g:LspAddServer(lspServers)
+enddef
+au FileType lua AddLuaLsp()
+
+# Rust
+def AddGoLsp(): void
+    var lspServers = [
+        {
+            filetype: 'go',
+            path: 'gopls',
+            args: ['serve']
+        }
+    ]
+    g:LspAddServer(lspServers)
+enddef
+au FileType go AddGoLsp()
+
+# Bash
+def AddBashLsp(): void
+    var lspServers = [
+        {
+            filetype: 'sh',
+            path: 'bash-language-server',
+            args: ['start']
+        }
+    ]
+    g:LspAddServer(lspServers)
+enddef
+au FileType go AddGoLsp()
+
+# Python
+def AddPythonLsp(): void
+    var lspServers = [
+        {
+            filetype: 'python',
+            path: 'jedi-language-server',
+            args: []
+        }
+    ]
+    g:LspAddServer(lspServers)
+enddef
+au FileType go AddGoLsp()
+
+# OCaml
+def AddOcamlLsp(): void
+    var lspServers = [
+        {
+            filetype: 'ocaml',
+            path: 'ocamllsp',
+            args: []
+        }
+    ]
+    g:LspAddServer(lspServers)
+enddef
+au FileType go AddGoLsp()
+
+# g:LspAddServer(lspServers)
+# # Can I set and unset options based on FileType?
+# g:LspOptionsSet({
+#     "snippetSupport": v:true, # this is just for emmet
+#     "useQuickfixForLocations": v:true
+# })
 
 # autocmd FileType html set omnifunc=htmlcomplete#CompleteTags
 
@@ -84,7 +224,7 @@ nnoremap gN :LspDiag prevWrap<CR>
 
 # :LspGotoDeclaration<CR>
 # :LspGotoDefinition:<CR>           # gd suggested
-# :LspGotoImpl<CR>                  # gi suggested
+nnoremap gi :LspGotoImpl<CR>
 # :LspGotoTypeDef<CR>               # gt suggested
 # :LspPeekDeclaration<CR>
 # :LspPeekDefinition<CR>

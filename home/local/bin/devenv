@@ -1,0 +1,641 @@
+#!/bin/bash
+
+# Location for tool source (when going that route)
+LOCAL_SRC=$HOME/.local/src
+LOCAL_BIN=$HOME/.local/bin
+LOCAL_SBIN=$HOME/.local/sbin
+LOCAL_LIB=$HOME/.local/lib
+LOCAL_INC=$HOME/.local/include
+CHK="\033[32m\u2714\033[0m"
+INF="\033[34m\u2139\033[0m"
+ERR="\033[31m\u2718\033[0m"
+
+# General setup
+make_dirs()
+{
+    if [ ! -d "$LOCAL_SRC" ]; then
+        echo -e "$INF Making directory: $LOCAL_SRC"
+        mkdir -p $LOCAL_SRC
+    fi
+
+    if [ ! -d "$LOCAL_BIN" ]; then
+        echo -e "$INF Making directory: $LOCAL_BIN"
+        mkdir -p $LOCAL_BIN
+    fi
+}
+
+# Make a symlink, but check if it exists first
+# $1 - The real thing
+# $2 - Link name
+symlink()
+{
+    local linkname="$(readlink $2)"
+    if [ "$1" != "$linkname" ]; then
+        rm $2 2> /dev/null
+        echo -e "$INF Making symlink: $(basename $2)"
+        ln -snvf "$1" "$2"
+    fi
+}
+
+chklink()
+{
+    if [ -x "$1" ]; then
+        echo -e "$CHK $(basename $1) found! All good here!"
+        return 0
+    fi
+
+    return 1
+}
+
+remlink()
+{
+    if [ -L "$1" ]; then
+        echo -e "$INF Removing defunct $(basename $1) link"
+    fi
+}
+# Source-ish
+#
+# Tools
+# - git - Can't git clone git - won't work
+# - nvm - Try deno and if that don't work, bun
+# - wezterm - only if there is an X or Wayland
+# - vim
+# - nvim
+# - fzf
+# - rg
+
+install_tool_git()
+{
+    # Just install this normally
+    echo "$ERR Git install not implemented"
+}
+
+install_tool_vim()
+{
+    local VIM_VER="v9.1.1406"
+    local VIM_SRC="$LOCAL_SRC/vim-git"
+    local VIM_REPO="https://github.com/vim/vim.git"
+    local BUILD_TGT="$VIM_SRC/target"
+    
+    chklink "$LOCAL_BIN/vim" && return
+    
+    remlink "$LOCAL_BIN/vim"
+
+    if [ ! -d "$VIM_SRC" ]; then
+        echo -e "$INF Cloning vim"
+        git clone $VIM_REPO $VIM_SRC
+        cd $VIM_SRC
+        git checkout $VIM_VER
+        cd -
+    fi
+
+    if [ ! -d "$BUILD_TGT" ]; then
+        echo -e "$INF Building vim"
+        cd $VIM_SRC
+        ./configure --prefix=$BUILD_TGT --exec-prefix=$BUILD_TGT
+        make
+        make install
+        cd -
+    fi
+
+    symlink "$BUILD_TGT/bin/vim" "$LOCAL_BIN/vim"
+}
+
+install_tool_nvim()
+{
+    local NVIM_VER="v0.11.1"
+    local NVIM_SRC="$LOCAL_SRC/nvim-git"
+    local NVIM_REPO="https://github.com/neovim/neovim.git"
+    local BUILD_TGT="$NVIM_SRC/build/target"
+    
+    chklink "$LOCAL_BIN/nvim" && return
+    
+    remlink "$LOCAL_BIN/nvim"
+
+    if [ ! -d "$NVIM_SRC" ]; then
+        echo -e "$INF Cloning nvim"
+        git clone $NVIM_REPO $NVIM_SRC
+        cd $NVIM_SRC
+        git checkout $NVIM_VER
+        cd -
+    fi
+
+    if [ ! -d "$BUILD_TGT" ]; then
+        echo -e "$INF Building nvim"
+        cd $NVIM_SRC
+        make CMAKE_EXTRA_FLAGS="-DCMAKE_INSTALL_PREFIX=$BUILD_TGT"
+        make install
+        cd -
+    fi
+
+    symlink "$BUILD_TGT/bin/nvim" "$LOCAL_BIN/nvim"
+}
+
+install_tool_fzf()
+{
+    local FZF_VER="master"
+    local FZF_SRC="$LOCAL_SRC/fzf-git"
+    local FZF_REPO="https://github.com/junegunn/fzf.git"
+    local BUILD_TGT="$FZF_SRC/target"
+
+    chklink "$LOCAL_BIN/fzf" && return
+
+    remlink "$LOCAL_BIN/fzf"
+
+    if [ ! -d "$FZF_SRC" ]; then
+        echo -e "$INF Cloning fzf"
+        git clone $FZF_REPO $FZF_SRC
+        cd $FZF_SRC
+        git checkout $FZF_VER
+        cd -
+    fi
+
+    if [ ! -d "$BUILD_TGT" ]; then
+        echo -e "$INF Building fzf"
+        cd $FZF_SRC
+        make
+        make install
+        cd -
+    fi
+
+    symlink "$FZF_SRC/bin/fzf" "$LOCAL_BIN/fzf"
+}
+
+install_tool_rg()
+{
+    local RG_VER="master"
+    local RG_SRC="$LOCAL_SRC/rg-git"
+    local RG_REPO="https://github.com/BurntSushi/ripgrep.git"
+    local BUILD_TGT="$RG_SRC/target/release"
+    
+    chklink "$LOCAL_BIN/rg" && return
+
+    remlink "$LOCAL_BIN/rg"
+
+    if [ ! -x "$(which cargo)" ]; then
+        echo -e "$ERR No cargo! no rg!"
+        return
+    fi
+    
+    if [ ! -d "$RG_SRC" ]; then
+        echo -e "$INF Cloning rg"
+        git clone $RG_REPO $RG_SRC
+    fi
+
+    if [ ! -x "$BUILD_TGT/rg" ]; then
+        echo "$INF Building rg"
+        cd $RG_SRC
+        cargo build --release
+        cd -
+    fi
+
+    symlink "$BUILD_TGT/rg" "$LOCAL_BIN/rg"
+
+}
+
+install_tool_wez()
+{
+    local WEZ_VER="main"
+    local WEZ_SRC="$LOCAL_SRC/wez-git"
+    local WEZ_REPO="https://github.com/wezterm/wezterm.git"
+
+    # first, lets check for X or wayland
+    if [ -z "$(which Xorg)" -a -z "$(which wayland-scanner)" ]; then
+        echo -e "$ERR No Xorg, no Wayland? No Wez"
+        return
+    fi
+
+    chklink "$LOCAL_BIN/wezterm" && return
+
+    remlink "$LOCAL_BIN/wezterm"
+
+    if [ ! -x "$(which cargo)" ]; then
+        echo -e "$ERR No cargo! no Wez!"
+        return
+    fi
+
+    if [ ! -d "$WEZ_SRC" ]; then
+        echo -e "$INF Cloning Wezterm"
+        git clone --depth=1 --branch=$WEZ_VER --recursive $WEZ_REPO $WEZ_SRC
+        cd $WEZ_SRC
+        git submodule update --init --recursive
+        cd -
+    fi
+
+    if [ ! -x "$LOCAL_SRC/wez-git/target/release/wezterm" ]; then
+        echo -e "$INF Building wezterm"
+        cd $WEZ_SRC
+        cargo clean && cargo build --release
+        cd -
+    fi
+
+    symlink $WEZ_SRC/target/release/wezterm $LOCAL_BIN/wezterm
+}
+
+
+#
+# Runtimes
+# - Deno: Cloned from github into $LOCAL_SRC, built to target directory and symlinked in $LOCAL_BIN
+# - Go: Binary tarball downloaded (wget, curl) into $LOCAL_SRC and symlinked in $LOCAL_BIN
+# - Lua: I don't have the runtime at the moment... just luals
+# - Node: handled by nvm, which is itself installed at the user level by default.
+# - PHP: Can be cloned and built from source.
+# - Rust: Managed by rustup, which keeps things in the home folder
+#
+
+install_rt_lua()
+{
+    local LUA_VER="5.4.7"
+    local LUA_URL="https://www.lua.org/ftp/lua-$LUA_VER.tar.gz"
+    local LUA_DIR="$LOCAL_SRC/lua-$LUA_VER"
+
+    chklink "$LOCAL_BIN/lua" && return
+
+    if [ ! -d "$LUA_DIR" ]; then
+        cd $LOCAL_SRC
+        curl -L -R -O $LUA_URL
+        tar zxf lua-$LUA_VER.tar.gz
+        cd - > /dev/null
+        cd $LUA_DIR
+        make
+        make local
+        cd - > /dev/null
+    fi
+
+    symlink $LUA_DIR/install/bin/lua $LOCAL_BIN/lua
+    symlink $LUA_DIR/install/bin/luac $LOCAL_BIN/luac
+}
+
+install_rt_go()
+{
+    local GO_VER="go1.24.3"
+    local GO_PKG="$GO_VER.$(uname | tr '[:upper:]' '[:lower:]')-$(uname -m | sed 's/x86_64/amd64/').tar.gz"
+    local GO_URL="https://go.dev/dl/$GO_PKG"
+
+    # Check if the bin is executable
+    chklink "$LOCAL_BIN/go" && return
+
+    cd $LOCAL_SRC
+    # Look for a local src
+    if [ ! -d "$GO_VER" ]; then
+        if [ ! -f  $GO_PKG ]; then
+            echo -e "$INF Downloading $GO_PKG"
+            curl -L -R -O $GO_URL
+        fi
+        echo -e "$INF Extracting $GO_PKG"
+        tar -xf $GO_PKG
+        mv ./go ./$GO_VER
+    fi
+    cd - > /dev/null
+
+    symlink $LOCAL_SRC/$GO_VER/bin/go $LOCAL_BIN/go
+    symlink $LOCAL_SRC/$GO_VER/bin/go $LOCAL_BIN/go
+
+}
+
+install_rt_rust()
+{
+    local RUSTUP_BIN="$HOME/.cargo/bin/rustup"
+
+    if [ ! -x "$RUSTUP_BIN" ]; then
+        echo -e "$INF Installing rust"
+        curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- --no-modify-path -y
+    else
+        echo -e "$CHK rust found! All good here!"
+    fi
+}
+
+install_rt_ocaml()
+{
+    echo -e "$INF TODO: Ocaml runtime"
+}
+
+install_rt_deno()
+{
+    # depends on cargo, cmake, protobuf-compiler, libglib2.0-dev, https://apt.llvm.org/llvm.sh
+    chklink "$LOCAL_BIN/deno" && return 
+
+    if [ ! -d "$LOCAL_SRC/deno-git" ]; then
+        echo -e "$INF Cloning deno"
+        git clone --recurse-submodules https://github.com/denoland/deno.git $LOCAL_SRC/deno-git
+    fi
+
+    if [ ! -x "$(which cargo)" ]; then
+        echo -e "$ERR No cargo! no deno!"
+        return
+    fi
+
+    if [ ! -x "$LOCAL_SRC/deno-git/target/release/deno" ]; then
+        echo -e "$INF Building deno"
+        cd $LOCAL_SRC/deno-git
+        cargo clean && cargo build --release
+        cd -
+    fi
+
+    symlink $LOCAL_SRC/deno-git/target/release/deno $LOCAL_BIN/deno
+}
+
+install_rt_node()
+{
+    local NODE_VER="v22.16.0"
+    local NODE_PKG="node-$NODE_VER-$(uname | tr '[:upper:]' '[:lower:]')-$(uname -m | sed 's/x86_64/x64/')"
+    local NODE_URL="https://nodejs.org/download/release/latest-jod/$NODE_PKG.tar.gz"
+    local NODE_SRC="$LOCAL_SRC/$NODE_PKG"
+
+    chklink "$LOCAL_BIN/node" \
+        && chklink "$LOCAL_BIN/npm" \
+        && chklink "$LOCAL_BIN/npx" \
+        && chklink "$LOCAL_BIN/corepack" \
+        && return
+
+    remlink "$LOCAL_BIN/node"
+    remlink "$LOCAL_BIN/npm"
+    remlink "$LOCAL_BIN/npx"
+    remlink "$LOCAL_BIN/corepack"
+
+    if [ ! -f "$LOCAL_SRC/$NODE_PKG.tar.gz" ]; then
+        echo -e "$INF Downloading node"
+        cd $LOCAL_SRC
+        curl -L -R -O $NODE_URL
+        cd -
+    fi
+
+    if [ ! -d "$NODE_SRC" ]; then
+        echo -e "$INF Extracting node"
+        cd $LOCAL_SRC
+        tar -xf $NODE_PKG.tar.gz
+        cd -
+    fi
+
+    echo -e "$INF Making node synlinks"
+    symlink "$NODE_SRC/bin/node" "$LOCAL_BIN/node"
+    symlink "$NODE_SRC/bin/npm" "$LOCAL_BIN/npm"
+    symlink "$NODE_SRC/bin/npx" "$LOCAL_BIN/npx"
+    symlink "$NODE_SRC/bin/corepack" "$LOCAL_BIN/corepack"
+    
+}
+
+install_rt_ts()
+{
+    local TS_PKG="typescript"
+    local TS_BIN="tsc"
+
+    chklink "$LOCAL_BIN/$TS_BIN" && return
+    remlink "$LOCAL_BIN/$TS_BIN"
+
+    if [ -z "$(npm --prefix=$HOME/.local ls -g --parseable $TS_PKG)" ]; then
+        echo -e "$INF Installing $TS_PKG"
+        npm --prefix=$HOME/.local i -g $TS_PKG
+    fi
+
+}
+
+install_rt_php()
+{
+    # Depends on pkg-config build-essential autoconf bison re2c libxml2-dev libsqlite3-dev
+    # oniguruma for mbstring
+
+    local PHP_VER="php-8.4.7"
+    local PHP_REPO="https://github.com/php/php-src.git"
+    local PHP_SRC="$LOCAL_SRC/php-git"
+    local BUILD_TGT="$PHP_SRC/target"
+    local PHP_INI="$BUILD_TGT/lib/php.ini"
+
+    chklink "$LOCAL_SRC/php" && return
+
+    remlink "$LOCAL_SRC/php"
+
+    if [ ! -d "$PHP_SRC" ]; then
+        echo -e "$INF Cloning php"
+        git clone $PHP_REPO $PHP_SRC
+        cd $PHP_SRC
+        git checkout $PHP_VER
+        cd -
+    fi
+
+    if [ ! -s "$PHP_SRC/configure" ]; then
+        echo -e "$INF Generating php configure"
+        cd $PHP_SRC
+        ./buildconf --force
+        cd -
+    fi
+
+    if [ ! -s "$PHP_SRC/config.status" ]; then
+        echo -e "$INF Configuring php for build"
+        cd $PHP_SRC
+        ./configure --prefix=$BUILD_TGT --exec-prefix=$BUILD_TGT \
+            --without-sqlite3 \
+            --without-pdo-sqlite \
+            --enable-fpm \
+            --with-openssl \
+            --enable-exif \
+            --enable-intl \
+            --with-pear \
+            --with-mysqli \
+            --enable-gd \
+            --enable-ftp
+            # --with-curl -- needs some libcurl
+            # --enable-mbstring -- needs oniguruma
+            # --with-pgsql -- needs more psql libs than I have.
+        cd -
+    fi
+    
+    if [ ! -d "$BUILD_TGT" ]; then
+        echo -e "$INF Building php"
+        cd $PHP_SRC
+        make
+        make install
+        cd -
+    fi
+    
+    if [ ! -s "$PHP_INI" ]; then
+        echo -e "$INF Copying php.ini"
+        cd $PHP_SRC
+        cp php.ini-development $PHP_INI
+        sed -i '0,/^;include_path/s|^;include_path = .*|include_path = "/home/${USER}/.local/lib/php:/home/${USER}/.local/include/php"|' "$PHP_INI"
+        cd -
+    fi
+
+    symlink $BUILD_TGT/lib/php $LOCAL_LIB/php
+    symlink $BUILD_TGT/include/php $LOCAL_INC/php
+
+    symlink $BUILD_TGT/bin/php $LOCAL_BIN/php
+    symlink $BUILD_TGT/bin/phpize $LOCAL_BIN/phpize
+    symlink $BUILD_TGT/bin/pecl $LOCAL_BIN/pecl
+    symlink $BUILD_TGT/bin/phar $LOCAL_BIN/phar
+    symlink $BUILD_TGT/sbin/php-fpm $LOCAL_SBIN/php-fpm
+    
+}
+
+# Language Servers
+# - JS/TS: Deno comes with a language server
+# - Rust: Also comes with a language server
+# - OCaml: Also comes with a language server
+# - Go: gopls - Installed via `go install`.  Will stay in the home folder if the Go environment was handled when installing Go.
+# - Lua: luals - build from source
+# - Python: jedi-language-server - pip install -t $HOME/.local/src/jls jedi-language-server==some_version
+
+#LSPs
+install_lsp_lua()
+{
+    # Depends on Ninja and C++17
+
+    local LUALS_VER="master"
+    local LUALS_REPO="https://github.com/LuaLS/lua-language-server"
+    local LUALS_DIR=$LOCAL_SRC/luals-git
+    local LUALS_BIN="lua-language-server"
+    local LUALS_BLT=$LUALS_DIR/build/bin/$LUALS_BIN
+
+    chklink "$LOCAL_BIN/$LUALS_BIN" && return
+
+    if [ ! -d "$LUALS_DIR" ]; then
+        echo "$INF Making directory: $LUALS_DIR"
+        mkdir -p $LUALS_DIR
+    fi
+
+    if [ ! -x "$LUALS_DIR/make.sh" ]; then
+        echo "$INF Cloning: $LUALS_REPO"
+        git clone $LUALS_REPO $LUALS_DIR
+    fi
+
+    if [ ! -x "$LUALS_BLT" ]; then
+        echo "$INF Building: $LUALS_BLT"
+        cd $LUALS_DIR
+        ./make.sh
+        cd - > /dev/null
+    fi
+
+    symlink $LUALS_BLT $LOCAL_BIN/$LUALS_BIN
+}
+
+install_lsp_go()
+{
+    chklink "$LOCAL_BIN/gopls" && return
+
+    if [ ! -x "$LOCAL_BIN/go" ]; then
+        echo -e "$ERR No Go? No Go LSP"
+        return
+    fi
+
+    if [ "$GOBIN" != "$LOCAL_BIN" ]; then
+        echo -e "$ERR GOBIN is $GOBIN, but I was expecting $LOCAL_BIN"
+        return
+    fi
+
+    # We expect gopls to land in $GOBIN, which is $LOCAL_BIN
+    echo -e "$INF Installing lsp: gopls"
+    go install golang.org/x/tools/gopls@latest
+}
+
+install_lsp_php()
+{
+    local PHPACTOR_VER="2025.04.17.0"
+    local PHPACTOR_DIR=$LOCAL_SRC/phpactor-$PHPACTOR_VER
+
+    chklink "$LOCAL_BIN/phpactor" && return
+
+    if [ ! -d "$PHPACTOR_DIR" ]; then
+        echo -e "$INF Making directory: $PHPACTOR_DIR"
+        mkdir -p $PHPACTOR_DIR
+    fi
+
+    if [ ! -f "$PHPACTOR_DIR/phpactor.phar" ]; then
+        curl -Lo $PHPACTOR_DIR/phpactor.phar https://github.com/phpactor/phpactor/releases/download/$PHPACTOR_VER/phpactor.phar
+    fi
+
+    if [ ! -x "$PHPACTOR_DIR/phpactor.phar" ]; then
+        chmod a+x $PHPACTOR_DIR/phpactor.phar
+    fi
+
+    symlink $PHPACTOR_DIR/phpactor.phar $LOCAL_BIN/phpactor
+}
+
+install_lsp_python()
+{
+    # Needs $JEDI_SRC/local/lib/python3.12/dist_packages in PYTHONPATH
+
+    local JEDI_VER="0.45.1"
+    local JEDI_SRC="$LOCAL_SRC/jls_$JEDI_VER"
+    local JEDI_BIN="jedi-language-server"
+
+    chklink "$LOCAL_BIN/$JEDI_BIN" && return
+
+    if [ ! -d "$JEDI_SRC" ]; then
+        echo -e "$INF Installing $JEDI_BIN"
+        pip install --prefix=$JEDI_SRC $JEDI_BIN
+    fi
+
+    symlink $JEDI_SRC/local/bin/$JEDI_BIN $LOCAL_BIN/$JEDI_BIN
+
+}
+
+install_lsp_bash()
+{
+    local BASH_BIN="bash-language-server"
+
+    chklink "$LOCAL_BIN/$BASH_BIN" && return
+
+    if [ -z "$(npm --prefix=$HOME/.local ls -g --parseable $BASH_BIN)" ]; then
+        echo "$INF Installing $BASH_BIN"
+        npm --prefix=$HOME/.local i -g $BASH_BIN
+    fi
+}
+
+install_lsp_emmet()
+{
+    local EMMET_BIN="emmet-language-server"
+
+    chklink "$LOCAL_BIN/$EMMET_BIN" && return
+
+    if [ -z "$(npm --prefix=$HOME/.local ls -g --parseable @olrtg/$EMMET_BIN)" ]; then
+        echo -e "$INF Installing $EMMET_BIN"
+        npm --prefix=$HOME/.local i -g @olrtg/$EMMET_BIN
+    fi
+
+}
+
+install_lsp_vscode()
+{
+    local VSC_EXT="vscode-langservers-extracted"
+
+    if [ ! -z "$(npm --prefix=$HOME/.local ls -g --parseable $VSC_EXT)" ]; then
+        echo -e "$CHK $VSC_EXT found! All good here!"
+        return
+    else
+        echo "$INF Installing $VSC_EXT"
+        npm --prefix=$HOME/.local i -g $VSC_EXT
+    fi
+
+}
+
+make_dirs
+
+
+# install langs
+echo -e "--- Languages"
+install_rt_lua
+install_rt_go
+install_rt_rust
+install_rt_deno
+install_rt_node
+install_rt_ts
+install_rt_php
+
+# Install LSPs
+echo -e "--- LSPs"
+install_lsp_lua
+install_lsp_go
+install_lsp_php
+install_lsp_python
+install_lsp_bash
+install_lsp_emmet
+install_lsp_vscode
+
+# install tools
+echo -e "--- Tools"
+install_tool_vim
+install_tool_nvim
+install_tool_fzf
+install_tool_rg
+install_tool_wez
+
