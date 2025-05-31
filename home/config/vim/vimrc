@@ -55,11 +55,10 @@ filetype plugin indent on
 set suffixesadd=.js
 set updatetime=1000
 set undofile
-set undodir=~/.vim/undos
 set tags=~/.vim/tags
-set directory=~/tmp
-set backupdir=~/tmp
-set undodir=~/tmp
+set directory=~/.vim/tmp/swap
+set backupdir=~/.vim/tmp/backup
+set undodir=~/.vim/tmp/undo
 
 # Nops
 nmap <Up> <Nop>
