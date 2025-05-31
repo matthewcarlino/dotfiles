@@ -22,6 +22,21 @@ make_dirs()
         echo -e "$INF Making directory: $LOCAL_BIN"
         mkdir -p $LOCAL_BIN
     fi
+    
+    if [ ! -d "$LOCAL_SBIN" ]; then
+        echo -e "$INF Making directory: $LOCAL_SBIN"
+        mkdir -p $LOCAL_SBIN
+    fi
+
+    if [ ! -d "$LOCAL_LIB" ]; then
+        echo -e "$INF Making directory: $LOCAL_LIB"
+        mkdir -p $LOCAL_LIB
+    fi
+
+    if [ ! -d "$LOCAL_INC" ]; then
+        echo -e "$INF Making directory: $LOCAL_INC"
+        mkdir -p $LOCAL_INC
+    fi
 }
 
 # Make a symlink, but check if it exists first
