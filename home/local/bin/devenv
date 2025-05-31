@@ -215,7 +215,7 @@ install_tool_wez()
     local WEZ_REPO="https://github.com/wezterm/wezterm.git"
 
     # first, lets check for X or wayland
-    if [ -z "$(which Xorg)" -a -z "$(which wayland-scanner)" ]; then
+    if [ -z "$(which Xorg > /dev/null)" -a -z "$(which wayland-scanner > /dev/null)" ]; then
         echo -e "$ERR No Xorg, no Wayland? No Wez"
         return
     fi
