@@ -504,17 +504,17 @@ install_lsp_lua()
     chklink "$LOCAL_BIN/$LUALS_BIN" && return
 
     if [ ! -d "$LUALS_DIR" ]; then
-        echo "$INF Making directory: $LUALS_DIR"
+        echo -e "$INF Making directory: $LUALS_DIR"
         mkdir -p $LUALS_DIR
     fi
 
     if [ ! -x "$LUALS_DIR/make.sh" ]; then
-        echo "$INF Cloning: $LUALS_REPO"
+        echo -e "$INF Cloning: $LUALS_REPO"
         git clone $LUALS_REPO $LUALS_DIR
     fi
 
     if [ ! -x "$LUALS_BLT" ]; then
-        echo "$INF Building: $LUALS_BLT"
+        echo -e "$INF Building: $LUALS_BLT"
         cd $LUALS_DIR
         ./make.sh
         cd - > /dev/null
