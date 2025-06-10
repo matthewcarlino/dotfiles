@@ -113,6 +113,12 @@ install_tool_vim()
         cd -
     fi
 
+    if [ ! -d "$HOME/.vim/tmp" ]; then
+        echo -e "$INF making vim temp dirs"
+        mkdir -p $HOME/.vim/tmp/swap $HOME/.vim/tmp/backup $HOME/.vim/tmp/undo
+    fi
+    
+
     symlink "$BUILD_TGT/bin/vim" "$LOCAL_BIN/vim"
 }
 
@@ -215,7 +221,7 @@ install_tool_wez()
     local WEZ_REPO="https://github.com/wezterm/wezterm.git"
 
     # first, lets check for X or wayland
-    if [ -z "$(which Xorg > /dev/null)" -a -z "$(which wayland-scanner > /dev/null)" ]; then
+    if [ -z "$(which Xorg 2> /dev/null)" -a -z "$(which wayland-scanner 2> /dev/null)" ]; then
         echo -e "$ERR No Xorg, no Wayland? No Wez"
         return
     fi
