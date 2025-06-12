@@ -117,7 +117,6 @@ install_tool_vim()
         echo -e "$INF making vim temp dirs"
         mkdir -p $HOME/.vim/tmp/swap $HOME/.vim/tmp/backup $HOME/.vim/tmp/undo
     fi
-    
 
     symlink "$BUILD_TGT/bin/vim" "$LOCAL_BIN/vim"
 }
@@ -400,9 +399,15 @@ install_rt_ts()
 {
     local TS_PKG="typescript"
     local TS_BIN="tsc"
+    local TSSERV_BIN="tsserver"
+    local TS_BINDIR="$LOCAL_LIB/node_modules/typescript/bin"
 
-    chklink "$LOCAL_BIN/$TS_BIN" && return
+    chklink "$LOCAL_BIN/$TS_BIN" \
+        && chklink "$LOCAL_BIN/$TSSERV_BIN" \
+        && return
+
     remlink "$LOCAL_BIN/$TS_BIN"
+    remlink "$LOCAL_BIN/$TSSERV_BIN"
 
     if [ -z "$(npm --prefix=$HOME/.local ls -g --parseable $TS_PKG)" ]; then
         echo -e "$INF Installing $TS_PKG"
@@ -620,11 +625,22 @@ install_lsp_emmet()
 install_lsp_vscode()
 {
     local VSC_EXT="vscode-langservers-extracted"
+    local VSC_BINDIR="$LOCAL_LIB/node_modules/vscode-langservers-extracted/bin"
 
-    if [ ! -z "$(npm --prefix=$HOME/.local ls -g --parseable $VSC_EXT)" ]; then
-        echo -e "$CHK $VSC_EXT found! All good here!"
-        return
-    else
+    chklink "$LOCAL_BIN/vscode-css-language-server" \
+        && chklink "$LOCAL_BIN/vscode-eslint-language-server" \
+        && chklink "$LOCAL_BIN/vscode-html-language-server" \
+        && chklink "$LOCAL_BIN/vscode-json-language-server" \
+        && chklink "$LOCAL_BIN/vscode-markdown-language-server" \
+        && return
+
+    remlink "$LOCAL_BIN/vscode-css-language-server"
+    remlink "$LOCAL_BIN/vscode-eslint-language-server"
+    remlink "$LOCAL_BIN/vscode-html-language-server"
+    remlink "$LOCAL_BIN/vscode-json-language-server"
+    remlink "$LOCAL_BIN/vscode-markdown-language-server"
+
+    if [ -z "$(npm --prefix=$HOME/.local ls -g --parseable $VSC_EXT)" ]; then
         echo "$INF Installing $VSC_EXT"
         npm --prefix=$HOME/.local i -g $VSC_EXT
     fi
