@@ -622,6 +622,19 @@ install_lsp_emmet()
 
 }
 
+install_lsp_ts()
+{
+    local TSLSP_BIN="typescript-language-server"
+
+    chklink "$LOCAL_BIN/$TSLSP_BIN" && return
+
+    if [ -z "$(npm --prefix=$HOME/.local ls -g --parseable $TSLSP_BIN)" ]; then
+        echo -e "$INF Installing $TSLSP_BIN"
+        npm --prefix=$HOME/.local i -g $TSLSP_BIN
+    fi
+
+}
+
 install_lsp_vscode()
 {
     local VSC_EXT="vscode-langservers-extracted"
@@ -669,6 +682,7 @@ install_lsp_python
 install_lsp_bash
 install_lsp_emmet
 install_lsp_vscode
+install_lsp_ts
 
 # install tools
 echo -e "--- Tools"
