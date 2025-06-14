@@ -7,7 +7,15 @@ def Colorscheme(): void
         colorscheme slate
     endif
 enddef
-Colorscheme()
+
+def ToggleScheme(): void
+
+    if g:colors_name == 'slate'
+        colorscheme shine
+    else
+        colorscheme slate
+    endif
+enddef
 
 # set bg=dark
 
@@ -27,5 +35,8 @@ g:lightline = {
       \ 'colorscheme': 'Tomorrow_Night',
       \ }
 
+Colorscheme()
 command -nargs=0 SetColorMode Colorscheme()
+command -nargs=0 ToggleColor ToggleScheme()
 noremap <F11> :SetColorMode<CR>
+noremap <F10> :ToggleColor<CR>
