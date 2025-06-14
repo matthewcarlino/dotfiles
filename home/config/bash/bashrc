@@ -10,11 +10,11 @@ shopt -s direxpand
 
 [ -x /usr/bin/lesspipe ] && eval "$(SHELL=/bin/sh lesspipe)"
 
-[[ -x $(which dircolors) ]] && eval "$(dircolors -b)"
+[[ -x $(which dircolors 2> /dev/null) ]] && eval "$(dircolors -b)"
 
 . $HOME/.config/bash/env
 . $HOME/.config/bash/complete
 . $HOME/.config/bash/prompt
 . $HOME/.config/bash/alias
 
-[[ -x $(which scent) ]] && scent
+[[ -x $(which scent 2> /dev/null) ]] && scent
