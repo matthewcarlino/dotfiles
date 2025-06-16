@@ -159,7 +159,20 @@ def AddBashLsp(): void
     ]
     g:LspAddServer(lspServers)
 enddef
-au FileType go AddGoLsp()
+au FileType sh AddBashLsp()
+
+# PHP
+def AddPhpLsp(): void
+    var lspServers = [
+        {
+            filetype: 'php',
+            path: 'phpactor',
+            args: []
+        }
+    ]
+    g:LspAddServer(lspServers)
+enddef
+au FileType php AddPhpLsp()
 
 # Python
 def AddPythonLsp(): void
@@ -172,7 +185,7 @@ def AddPythonLsp(): void
     ]
     g:LspAddServer(lspServers)
 enddef
-au FileType go AddGoLsp()
+au FileType python AddPythonLsp()
 
 # OCaml
 def AddOcamlLsp(): void
@@ -185,7 +198,7 @@ def AddOcamlLsp(): void
     ]
     g:LspAddServer(lspServers)
 enddef
-au FileType go AddGoLsp()
+au FileType ocaml AddOcamlLsp()
 
 # Can I set and unset options based on FileType?
 # g:LspOptionsSet({
@@ -222,9 +235,9 @@ nnoremap gN :LspDiag prevWrap<CR>
 # :LspShowReferences<CR>
 
 # :LspGotoDeclaration<CR>
-nnoremap gd :LspGotoDefinition<CR>  # gd suggested
+nnoremap gd :LspGotoDefinition<CR>
 nnoremap gi :LspGotoImpl<CR>
-nnoremap gt :LspGotoTypeDef<CR>     # gt suggested
+nnoremap gt :LspGotoTypeDef<CR>
 # :LspPeekDeclaration<CR>
 # :LspPeekDefinition<CR>
 # :LspPeekImpl<CR>
