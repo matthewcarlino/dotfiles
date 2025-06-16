@@ -187,8 +187,7 @@ def AddOcamlLsp(): void
 enddef
 au FileType go AddGoLsp()
 
-# g:LspAddServer(lspServers)
-# # Can I set and unset options based on FileType?
+# Can I set and unset options based on FileType?
 # g:LspOptionsSet({
 #     "snippetSupport": v:true, # this is just for emmet
 #     "useQuickfixForLocations": v:true
@@ -223,9 +222,9 @@ nnoremap gN :LspDiag prevWrap<CR>
 # :LspShowReferences<CR>
 
 # :LspGotoDeclaration<CR>
-# :LspGotoDefinition:<CR>           # gd suggested
+nnoremap gd :LspGotoDefinition<CR>  # gd suggested
 nnoremap gi :LspGotoImpl<CR>
-# :LspGotoTypeDef<CR>               # gt suggested
+nnoremap gt :LspGotoTypeDef<CR>     # gt suggested
 # :LspPeekDeclaration<CR>
 # :LspPeekDefinition<CR>
 # :LspPeekImpl<CR>
