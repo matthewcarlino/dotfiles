@@ -167,7 +167,7 @@ def AddPhpLsp(): void
         {
             filetype: 'php',
             path: 'phpactor',
-            args: []
+            args: ['language-server']
         }
     ]
     g:LspAddServer(lspServers)
