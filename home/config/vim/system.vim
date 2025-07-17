@@ -18,6 +18,7 @@ enddef
 
 g:uname = GetUname()
 
-
+g:user_emmet_install_global = 0
+g:gitgutter_preview_win_floating = 1
 
 

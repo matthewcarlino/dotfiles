@@ -6,15 +6,13 @@ g:mapleader = ','
 # TODO
 # - Select-mode?
 
-import "~/.config/vim/system.vim"
+import "~/.config/vim/system.vim" # check here for pack globals
 import "~/.config/vim/pack.vim"
 import "~/.config/vim/pops.vim"
 
 import "~/.config/vim/lsp.vim"
 import "~/.config/vim/color.vim"
 import "~/.config/vim/fzf.vim"
-
-g:gitgutter_preview_win_floating = 1
 
 # Interface stuff
 set encoding=UTF-8
@@ -25,8 +23,7 @@ set noshowmode
 set number
 set relativenumber
 set splitbelow
-set ttimeoutlen=0
-set timeoutlen=500
+set timeout ttimeout timeoutlen=1000 ttimeoutlen=100
 set wildmenu
 set viminfo='0,<50,s10,h
 syntax on

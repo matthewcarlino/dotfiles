@@ -7,12 +7,11 @@ vim9script
 
 # HTML/CSS
 def AddEmmetLsp(): void
-    g:user_emmet_install_global = 0
-    g:user_emmet_leader_key = ","
 
+    g:user_emmet_leader_key = ","
     var lspServers = [
         {
-            filetype: ['html', 'css'],
+            filetype: ['gohtml', 'html', 'css'],
             path: 'emmet-language-server',
             args: ['--stdio'],
         }
@@ -21,7 +20,7 @@ def AddEmmetLsp(): void
 
     EmmetInstall
 enddef
-au FileType html,css AddEmmetLsp()
+au FileType gohtml,html,css AddEmmetLsp()
 
 # HTML/CSS/JSON/ESLint (vscode-langservers-extracted)
 def AddHtmlLsp(): void
