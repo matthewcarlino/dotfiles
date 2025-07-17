@@ -5,7 +5,9 @@ configDir=$HOME/.config
 mkdir -p $configDir
 
 symlink () {
-    ln -snvf "$1" "$2"
+    if [ ! -x "$2" ]; then
+        ln -snvf "$1" "$2"
+    fi
 }
 
 symlink "$cwd/home/config/tmux"         "$HOME/.config/tmux"
@@ -18,3 +20,6 @@ symlink "$cwd/home/config/vim/vimrc"    "$HOME/.vimrc"
 symlink "$cwd/home/config/bash/profile" "$HOME/.profile"
 symlink "$cwd/home/config/bash/bashrc"  "$HOME/.bashrc"
 
+symlink "$cwd/home/local/bin/dmenu/passmenu" "$HOME/.local/bin/passmenu"
+symlink "$cwd/home/local/bin/dmenu/mathmenu" "$HOME/.local/bin/mathmenu"
+symlink "$cwd/home/local/bin/dmenu/manmenu" "$HOME/.local/bin/manmenu"

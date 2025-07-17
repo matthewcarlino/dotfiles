@@ -34,14 +34,14 @@ au FileType html AddHtmlLsp()
 def AddCssLsp(): void
     var lspServers = [
         {
-            filetype: ['css'],
+            filetype: ['css', 'scss'],
             path: 'vscode-css-language-server',
             args: ['--stdio'],
         }
     ]
     g:LspAddServer(lspServers)
 enddef
-au FileType css AddCssLsp()
+au FileType css,scss AddCssLsp()
 
 def AddJsonLsp(): void
     var lspServers = [
