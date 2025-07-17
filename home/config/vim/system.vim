@@ -8,9 +8,9 @@ enddef
 def g:IsLightMode(): bool
     var mode = ''
     if g:uname == 'Darwin'
-        mode = system('defaults read -g AppleInterfaceStyle 2> /dev/null || echo "light"')
+        mode = system('defaults read -g AppleInterfaceStyle 2> /dev/null || echo "dark"')
     else
-        mode = system('gsettings get org.cinnamon.theme name 2> /dev/null')
+        mode = system('gsettings get org.cinnamon.theme name 2> /dev/null || echo "dark"')
     endif
 
     return stridx(tolower(mode), 'dark') == -1
