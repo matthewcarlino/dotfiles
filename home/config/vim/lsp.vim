@@ -7,16 +7,20 @@ vim9script
 
 # HTML/CSS
 def AddEmmetLsp(): void
+
+    g:user_emmet_leader_key = ","
     var lspServers = [
         {
-            filetype: ['html', 'css'],
+            filetype: ['gohtml', 'html', 'css'],
             path: 'emmet-language-server',
             args: ['--stdio'],
         }
     ]
     g:LspAddServer(lspServers)
+
+    EmmetInstall
 enddef
-au FileType html,css AddEmmetLsp()
+au FileType gohtml,html,css AddEmmetLsp()
 
 # HTML/CSS/JSON/ESLint (vscode-langservers-extracted)
 def AddHtmlLsp(): void
@@ -147,6 +151,7 @@ def AddGoLsp(): void
     g:LspAddServer(lspServers)
 enddef
 au FileType go AddGoLsp()
+au BufNewFile,BufRead *.gohtml dist#ft#FThtml()
 
 # Bash
 def AddBashLsp(): void
@@ -200,11 +205,12 @@ def AddOcamlLsp(): void
 enddef
 au FileType ocaml AddOcamlLsp()
 
-# Can I set and unset options based on FileType?
-# g:LspOptionsSet({
-#     "snippetSupport": v:true, # this is just for emmet
-#     "useQuickfixForLocations": v:true
-# })
+# g:LspAddServer(lspServers)
+# # Can I set and unset options based on FileType?
+g:LspOptionsSet({
+    "snippetSupport": v:true, # this is just for emmet
+    "useQuickfixForLocations": v:true
+})
 
 # autocmd FileType html set omnifunc=htmlcomplete#CompleteTags
 
