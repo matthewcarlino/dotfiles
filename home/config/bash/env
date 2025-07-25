@@ -30,6 +30,7 @@ export GOBIN=$HOME/.local/bin
 # test -r $HOME/.opam/opam-init/variables.sh && . $HOME/.opam/opam-init/variables.sh > /dev/null 2> /dev/null || true
 # will return to ocaml one day
 
-# python stuf
-PYTHONPATH="$PYTHONPATH:$(find $HOME/.local -path "*/python*/site-packages" -type d | tr '\n' ':' | sed 's/:$//')"
-export PYTHONPATH="$PYTHONPATH:$(find $HOME/.local -path "*/python*/dist-packages" -type d | tr '\n' ':' | sed 's/:$//')"
+# python stuff
+# export PYTHONPATH="$PYTHONPATH:$(find $HOME/.local/src -type d -name "*-packages" -path "*lib/python*" | tr '\n' ':' | sed 's/:$//')"
+# export PYTHONPATH="$PYTHONPATH:$(fd -t d '(site|dist)-packages$' $HOME/.local | grep '/python' | tr '\n' ':' | sed 's/:$//')"
+export PYTHONPATH="$HOME/.local/src/jls_0.45.1/local/lib/python3.12/dist-packages"
