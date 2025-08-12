@@ -68,16 +68,10 @@ remlink()
         echo -e "$INF Removing defunct $(basename $1) link"
     fi
 }
-# Source-ish
+
 #
 # Tools
-# - git - Can't git clone git - won't work
-# - nvm - Try deno and if that don't work, bun
-# - wezterm - only if there is an X or Wayland
-# - vim
-# - nvim
-# - fzf
-# - rg
+#
 
 install_tool_git()
 {
@@ -255,12 +249,6 @@ install_tool_wez()
 
 #
 # Runtimes
-# - Deno: Cloned from github into $LOCAL_SRC, built to target directory and symlinked in $LOCAL_BIN
-# - Go: Binary tarball downloaded (wget, curl) into $LOCAL_SRC and symlinked in $LOCAL_BIN
-# - Lua: I don't have the runtime at the moment... just luals
-# - Node: handled by nvm, which is itself installed at the user level by default.
-# - PHP: Can be cloned and built from source.
-# - Rust: Managed by rustup, which keeps things in the home folder
 #
 
 install_rt_lua()
@@ -355,44 +343,19 @@ install_rt_deno()
     symlink $LOCAL_SRC/deno-git/target/release/deno $LOCAL_BIN/deno
 }
 
-install_rt_node()
+install_rt_nvm()
 {
-    local NODE_VER="v22.16.0"
-    local NODE_PKG="node-$NODE_VER-$(uname | tr '[:upper:]' '[:lower:]')-$(uname -m | sed 's/x86_64/x64/')"
-    local NODE_URL="https://nodejs.org/download/release/latest-jod/$NODE_PKG.tar.gz"
-    local NODE_SRC="$LOCAL_SRC/$NODE_PKG"
+    local NVM_SRC="$LOCAL_SRC/nvm-git"
 
-    chklink "$LOCAL_BIN/node" \
-        && chklink "$LOCAL_BIN/npm" \
-        && chklink "$LOCAL_BIN/npx" \
-        && chklink "$LOCAL_BIN/corepack" \
-        && return
+    chklink "$LOCAL_BIN/nvm" && return
 
-    remlink "$LOCAL_BIN/node"
-    remlink "$LOCAL_BIN/npm"
-    remlink "$LOCAL_BIN/npx"
-    remlink "$LOCAL_BIN/corepack"
-
-    if [ ! -f "$LOCAL_SRC/$NODE_PKG.tar.gz" ]; then
-        echo -e "$INF Downloading node"
-        cd $LOCAL_SRC
-        curl -L -R -O $NODE_URL
-        cd -
+    if [ ! -d "$NVM_SRC" ]; then
+        echo -e "$INF Cloning nvm"
+        git clone https://github.com/nvm-sh/nvm.git $NVM_SRC
     fi
 
-    if [ ! -d "$NODE_SRC" ]; then
-        echo -e "$INF Extracting node"
-        cd $LOCAL_SRC
-        tar -xf $NODE_PKG.tar.gz
-        cd -
-    fi
-
-    echo -e "$INF Making node synlinks"
-    symlink "$NODE_SRC/bin/node" "$LOCAL_BIN/node"
-    symlink "$NODE_SRC/bin/npm" "$LOCAL_BIN/npm"
-    symlink "$NODE_SRC/bin/npx" "$LOCAL_BIN/npx"
-    symlink "$NODE_SRC/bin/corepack" "$LOCAL_BIN/corepack"
-    
+    symlink $NVM_SRC/nvm-exec $LOCAL_BIN/nvm
+    symlink $NVM_SRC/nvm.sh $LOCAL_BIN/nvm.sh
 }
 
 install_rt_ts()
@@ -496,15 +459,10 @@ install_rt_php()
     
 }
 
+#
 # Language Servers
-# - JS/TS: Deno comes with a language server
-# - Rust: Also comes with a language server
-# - OCaml: Also comes with a language server
-# - Go: gopls - Installed via `go install`.  Will stay in the home folder if the Go environment was handled when installing Go.
-# - Lua: luals - build from source
-# - Python: jedi-language-server - pip install -t $HOME/.local/src/jls jedi-language-server==some_version
+#
 
-#LSPs
 install_lsp_lua()
 {
     # Depends on Ninja and C++17
@@ -670,7 +628,7 @@ install_rt_lua
 install_rt_go
 install_rt_rust
 install_rt_deno
-install_rt_node
+install_rt_nvm
 install_rt_ts
 install_rt_php
 
