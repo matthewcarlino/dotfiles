@@ -75,7 +75,7 @@ remlink()
 
 install_tool_git()
 {
-    # Just install this normally
+    # Just be normal
     echo "$ERR Git install not implemented"
 }
 
@@ -88,7 +88,6 @@ install_tool_vim()
     
     chklink "$LOCAL_BIN/vim" && return
     
-    remlink "$LOCAL_BIN/vim"
 
     if [ ! -d "$VIM_SRC" ]; then
         echo -e "$INF Cloning vim"
@@ -124,7 +123,6 @@ install_tool_nvim()
     
     chklink "$LOCAL_BIN/nvim" && return
     
-    remlink "$LOCAL_BIN/nvim"
 
     if [ ! -d "$NVIM_SRC" ]; then
         echo -e "$INF Cloning nvim"
@@ -154,8 +152,6 @@ install_tool_fzf()
 
     chklink "$LOCAL_BIN/fzf" && return
 
-    remlink "$LOCAL_BIN/fzf"
-
     if [ ! -d "$FZF_SRC" ]; then
         echo -e "$INF Cloning fzf"
         git clone $FZF_REPO $FZF_SRC
@@ -183,8 +179,6 @@ install_tool_rg()
     local BUILD_TGT="$RG_SRC/target/release"
     
     chklink "$LOCAL_BIN/rg" && return
-
-    remlink "$LOCAL_BIN/rg"
 
     if [ ! -x "$(which cargo)" ]; then
         echo -e "$ERR No cargo! no rg!"
@@ -221,8 +215,6 @@ install_tool_wez()
 
     chklink "$LOCAL_BIN/wezterm" && return
 
-    remlink "$LOCAL_BIN/wezterm"
-
     if [ ! -x "$(which cargo)" ]; then
         echo -e "$ERR No cargo! no Wez!"
         return
@@ -246,6 +238,25 @@ install_tool_wez()
     symlink $WEZ_SRC/target/release/wezterm $LOCAL_BIN/wezterm
 }
 
+install_tool_composer()
+{
+    local INST_DIR=$LOCAL_SRC/composer_installer
+    local INST_BIN=$INST_DIR/installer
+    local COMP_BIN=$LOCAL_BIN/composer
+
+    chklink "$COMP_BIN" && return
+
+    mkdir -p $INST_DIR
+    cd $INST_DIR
+    
+    if [ ! -x "$INST_BIN" ]; then
+	wget https://getcomposer.org/installer
+    fi
+
+    php $INST_BIN --install-dir=$LOCAL_BIN --filename=composer
+
+    cd -
+}
 
 #
 # Runtimes
@@ -369,9 +380,6 @@ install_rt_ts()
         && chklink "$LOCAL_BIN/$TSSERV_BIN" \
         && return
 
-    remlink "$LOCAL_BIN/$TS_BIN"
-    remlink "$LOCAL_BIN/$TSSERV_BIN"
-
     if [ -z "$(npm --prefix=$HOME/.local ls -g --parseable $TS_PKG)" ]; then
         echo -e "$INF Installing $TS_PKG"
         npm --prefix=$HOME/.local i -g $TS_PKG
@@ -390,9 +398,7 @@ install_rt_php()
     local BUILD_TGT="$PHP_SRC/target"
     local PHP_INI="$BUILD_TGT/lib/php.ini"
 
-    chklink "$LOCAL_SRC/php" && return
-
-    remlink "$LOCAL_SRC/php"
+    # chklink "$LOCAL_BIN/php" && return
 
     if [ ! -d "$PHP_SRC" ]; then
         echo -e "$INF Cloning php"
@@ -409,7 +415,7 @@ install_rt_php()
         cd -
     fi
 
-    if [ ! -s "$PHP_SRC/config.status" ]; then
+    # if [ ! -s "$PHP_SRC/config.status" ]; then
         echo -e "$INF Configuring php for build"
         cd $PHP_SRC
         ./configure --prefix=$BUILD_TGT --exec-prefix=$BUILD_TGT \
@@ -425,20 +431,21 @@ install_rt_php()
             --enable-ftp \
             --with-zip \
             --with-zlib \
-            --with-curl
+            --with-curl \
+            --enable-mbstring \
+	    --disable-mbregex
             # --with-iconv=/opt/homebrew/opt/libiconv
-            # --enable-mbstring -- needs oniguruma?
             # --with-pgsql
         cd -
-    fi
+    # fi
     
-    if [ ! -d "$BUILD_TGT" ]; then
+    # if [ ! -d "$BUILD_TGT" ]; then
         echo -e "$INF Building php"
         cd $PHP_SRC
         make
         make install
         cd -
-    fi
+    # fi
     
     if [ ! -s "$PHP_INI" ]; then
         echo -e "$INF Copying php.ini"
@@ -463,56 +470,56 @@ install_rt_php()
 # Language Servers
 #
 
-install_lsp_lua()
-{
-    # Depends on Ninja and C++17
+# install_lsp_lua()
+# {
+#     # Depends on Ninja and C++17
+#
+#     local LUALS_VER="master"
+#     local LUALS_REPO="https://github.com/LuaLS/lua-language-server"
+#     local LUALS_DIR=$LOCAL_SRC/luals-git
+#     local LUALS_BIN="lua-language-server"
+#     local LUALS_BLT=$LUALS_DIR/build/bin/$LUALS_BIN
+#
+#     chklink "$LOCAL_BIN/$LUALS_BIN" && return
+#
+#     if [ ! -d "$LUALS_DIR" ]; then
+#         echo -e "$INF Making directory: $LUALS_DIR"
+#         mkdir -p $LUALS_DIR
+#     fi
+#
+#     if [ ! -x "$LUALS_DIR/make.sh" ]; then
+#         echo -e "$INF Cloning: $LUALS_REPO"
+#         git clone $LUALS_REPO $LUALS_DIR
+#     fi
+#
+#     if [ ! -x "$LUALS_BLT" ]; then
+#         echo -e "$INF Building: $LUALS_BLT"
+#         cd $LUALS_DIR
+#         ./make.sh
+#         cd - > /dev/null
+#     fi
+#
+#     symlink $LUALS_BLT $LOCAL_BIN/$LUALS_BIN
+# }
 
-    local LUALS_VER="master"
-    local LUALS_REPO="https://github.com/LuaLS/lua-language-server"
-    local LUALS_DIR=$LOCAL_SRC/luals-git
-    local LUALS_BIN="lua-language-server"
-    local LUALS_BLT=$LUALS_DIR/build/bin/$LUALS_BIN
-
-    chklink "$LOCAL_BIN/$LUALS_BIN" && return
-
-    if [ ! -d "$LUALS_DIR" ]; then
-        echo -e "$INF Making directory: $LUALS_DIR"
-        mkdir -p $LUALS_DIR
-    fi
-
-    if [ ! -x "$LUALS_DIR/make.sh" ]; then
-        echo -e "$INF Cloning: $LUALS_REPO"
-        git clone $LUALS_REPO $LUALS_DIR
-    fi
-
-    if [ ! -x "$LUALS_BLT" ]; then
-        echo -e "$INF Building: $LUALS_BLT"
-        cd $LUALS_DIR
-        ./make.sh
-        cd - > /dev/null
-    fi
-
-    symlink $LUALS_BLT $LOCAL_BIN/$LUALS_BIN
-}
-
-install_lsp_go()
-{
-    chklink "$LOCAL_BIN/gopls" && return
-
-    if [ ! -x "$LOCAL_BIN/go" ]; then
-        echo -e "$ERR No Go? No Go LSP"
-        return
-    fi
-
-    if [ "$GOBIN" != "$LOCAL_BIN" ]; then
-        echo -e "$ERR GOBIN is $GOBIN, but I was expecting $LOCAL_BIN"
-        return
-    fi
-
-    # We expect gopls to land in $GOBIN, which is $LOCAL_BIN
-    echo -e "$INF Installing lsp: gopls"
-    go install golang.org/x/tools/gopls@latest
-}
+# install_lsp_go()
+# {
+#     chklink "$LOCAL_BIN/gopls" && return
+#
+#     if [ ! -x "$LOCAL_BIN/go" ]; then
+#         echo -e "$ERR No Go? No Go LSP"
+#         return
+#     fi
+#
+#     if [ "$GOBIN" != "$LOCAL_BIN" ]; then
+#         echo -e "$ERR GOBIN is $GOBIN, but I was expecting $LOCAL_BIN"
+#         return
+#     fi
+#
+#     # We expect gopls to land in $GOBIN, which is $LOCAL_BIN
+#     echo -e "$INF Installing lsp: gopls"
+#     go install golang.org/x/tools/gopls@latest
+# }
 
 install_lsp_php()
 {
@@ -537,49 +544,49 @@ install_lsp_php()
     symlink $PHPACTOR_DIR/phpactor.phar $LOCAL_BIN/phpactor
 }
 
-install_lsp_python()
-{
-    # Needs $JEDI_SRC/local/lib/python3.12/dist_packages in PYTHONPATH
+# install_lsp_python()
+# {
+#     # Needs $JEDI_SRC/local/lib/python3.12/dist_packages in PYTHONPATH
+#
+#     local JEDI_VER="0.45.1"
+#     local JEDI_SRC="$LOCAL_SRC/jls_$JEDI_VER"
+#     local JEDI_BIN="jedi-language-server"
+#
+#     chklink "$LOCAL_BIN/$JEDI_BIN" && return
+#
+#     if [ ! -d "$JEDI_SRC" ]; then
+#         echo -e "$INF Installing $JEDI_BIN"
+#         pip install --prefix=$JEDI_SRC $JEDI_BIN
+#     fi
+#
+#     symlink $JEDI_SRC/local/bin/$JEDI_BIN $LOCAL_BIN/$JEDI_BIN
+#
+# }
 
-    local JEDI_VER="0.45.1"
-    local JEDI_SRC="$LOCAL_SRC/jls_$JEDI_VER"
-    local JEDI_BIN="jedi-language-server"
+# install_lsp_bash()
+# {
+#     local BASH_BIN="bash-language-server"
+#
+#     chklink "$LOCAL_BIN/$BASH_BIN" && return
+#
+#     if [ -z "$(npm --prefix=$HOME/.local ls -g --parseable $BASH_BIN)" ]; then
+#         echo "$INF Installing $BASH_BIN"
+#         npm --prefix=$HOME/.local i -g $BASH_BIN
+#     fi
+# }
 
-    chklink "$LOCAL_BIN/$JEDI_BIN" && return
-
-    if [ ! -d "$JEDI_SRC" ]; then
-        echo -e "$INF Installing $JEDI_BIN"
-        pip install --prefix=$JEDI_SRC $JEDI_BIN
-    fi
-
-    symlink $JEDI_SRC/local/bin/$JEDI_BIN $LOCAL_BIN/$JEDI_BIN
-
-}
-
-install_lsp_bash()
-{
-    local BASH_BIN="bash-language-server"
-
-    chklink "$LOCAL_BIN/$BASH_BIN" && return
-
-    if [ -z "$(npm --prefix=$HOME/.local ls -g --parseable $BASH_BIN)" ]; then
-        echo "$INF Installing $BASH_BIN"
-        npm --prefix=$HOME/.local i -g $BASH_BIN
-    fi
-}
-
-install_lsp_emmet()
-{
-    local EMMET_BIN="emmet-language-server"
-
-    chklink "$LOCAL_BIN/$EMMET_BIN" && return
-
-    if [ -z "$(npm --prefix=$HOME/.local ls -g --parseable @olrtg/$EMMET_BIN)" ]; then
-        echo -e "$INF Installing $EMMET_BIN"
-        npm --prefix=$HOME/.local i -g @olrtg/$EMMET_BIN
-    fi
-
-}
+# install_lsp_emmet()
+# {
+#     local EMMET_BIN="emmet-language-server"
+#
+#     chklink "$LOCAL_BIN/$EMMET_BIN" && return
+#
+#     if [ -z "$(npm --prefix=$HOME/.local ls -g --parseable @olrtg/$EMMET_BIN)" ]; then
+#         echo -e "$INF Installing $EMMET_BIN"
+#         npm --prefix=$HOME/.local i -g @olrtg/$EMMET_BIN
+#     fi
+#
+# }
 
 install_lsp_ts()
 {
@@ -594,30 +601,30 @@ install_lsp_ts()
 
 }
 
-install_lsp_vscode()
-{
-    local VSC_EXT="vscode-langservers-extracted"
-    local VSC_BINDIR="$LOCAL_LIB/node_modules/vscode-langservers-extracted/bin"
-
-    chklink "$LOCAL_BIN/vscode-css-language-server" \
-        && chklink "$LOCAL_BIN/vscode-eslint-language-server" \
-        && chklink "$LOCAL_BIN/vscode-html-language-server" \
-        && chklink "$LOCAL_BIN/vscode-json-language-server" \
-        && chklink "$LOCAL_BIN/vscode-markdown-language-server" \
-        && return
-
-    remlink "$LOCAL_BIN/vscode-css-language-server"
-    remlink "$LOCAL_BIN/vscode-eslint-language-server"
-    remlink "$LOCAL_BIN/vscode-html-language-server"
-    remlink "$LOCAL_BIN/vscode-json-language-server"
-    remlink "$LOCAL_BIN/vscode-markdown-language-server"
-
-    if [ -z "$(npm --prefix=$HOME/.local ls -g --parseable $VSC_EXT)" ]; then
-        echo "$INF Installing $VSC_EXT"
-        npm --prefix=$HOME/.local i -g $VSC_EXT
-    fi
-
-}
+# install_lsp_vscode()
+# {
+#     local VSC_EXT="vscode-langservers-extracted"
+#     local VSC_BINDIR="$LOCAL_LIB/node_modules/vscode-langservers-extracted/bin"
+#
+#     chklink "$LOCAL_BIN/vscode-css-language-server" \
+#         && chklink "$LOCAL_BIN/vscode-eslint-language-server" \
+#         && chklink "$LOCAL_BIN/vscode-html-language-server" \
+#         && chklink "$LOCAL_BIN/vscode-json-language-server" \
+#         && chklink "$LOCAL_BIN/vscode-markdown-language-server" \
+#         && return
+#
+#     remlink "$LOCAL_BIN/vscode-css-language-server"
+#     remlink "$LOCAL_BIN/vscode-eslint-language-server"
+#     remlink "$LOCAL_BIN/vscode-html-language-server"
+#     remlink "$LOCAL_BIN/vscode-json-language-server"
+#     remlink "$LOCAL_BIN/vscode-markdown-language-server"
+#
+#     if [ -z "$(npm --prefix=$HOME/.local ls -g --parseable $VSC_EXT)" ]; then
+#         echo "$INF Installing $VSC_EXT"
+#         npm --prefix=$HOME/.local i -g $VSC_EXT
+#     fi
+#
+# }
 
 make_dirs
 
@@ -634,14 +641,14 @@ install_rt_php
 
 # Install LSPs
 echo -e "--- LSPs"
-install_lsp_lua
-install_lsp_go
-install_lsp_php
-install_lsp_python
-install_lsp_bash
-install_lsp_emmet
-install_lsp_vscode
-install_lsp_ts
+# install_lsp_lua
+# install_lsp_go
+# install_lsp_php
+# install_lsp_python
+# install_lsp_bash
+# install_lsp_emmet
+# install_lsp_vscode
+# install_lsp_ts
 
 # install tools
 echo -e "--- Tools"
@@ -650,4 +657,5 @@ install_tool_nvim
 install_tool_fzf
 install_tool_rg
 install_tool_wez
+install_tool_composer
 
