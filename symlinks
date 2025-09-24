@@ -13,6 +13,7 @@ symlink () {
 symlink "$cwd/home/config/tmux"         "$HOME/.config/tmux"
 symlink "$cwd/home/config/wezterm"      "$HOME/.config/wezterm"
 symlink "$cwd/home/config/vim"          "$HOME/.config/vim"
+symlink "$cwd/home/config/nvim"         "$HOME/.config/nvim"
 symlink "$cwd/home/config/bash"         "$HOME/.config/bash"
 symlink "$cwd/home/config/surf"         "$HOME/.config/surf"
 

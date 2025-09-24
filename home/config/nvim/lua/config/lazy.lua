@@ -14,7 +14,7 @@ local rtp = vim.opt.rtp
 rtp:prepend(lazypath)
 
 require("lazy").setup({
-    "NMAC427/guess-indent.nvim",
+    -- "NMAC427/guess-indent.nvim",
     "lewis6991/gitsigns.nvim",		-- Adds git related signs to the gutter, as well as utilities for managing changes
     require("plugins.which-key"), 			-- The shelf that pops up at the bottom as you typw a key sequence 
     require("plugins.telescope"),			-- The centered search pop up

@@ -4,6 +4,9 @@ vim.keymap.set("n", "<Esc>", "<cmd>nohlsearch<CR>")
 
 -- Diagnostics
 vim.keymap.set("n", "<leader>q", vim.diagnostic.setloclist, { desc = "Open diagnostic [Q]uickfix list" })
+vim.keymap.set("n", "<leader>d", function ()
+	vim.diagnostic.open_float()
+end, { desc = "Open diagnostic in float" })
 
 -- Arrow Keys
 vim.keymap.set("n", "<left>", '<cmd>echo "Use h to move!!"<CR>')

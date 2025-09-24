@@ -3,7 +3,10 @@ vim.g.mapleader = " "
 vim.g.maplocalleader = " "
 vim.o.number = true
 
+-- TODO: These values are not respected in HTML.  The guess-indent plugin is
+-- has no effect either installed or not.  Maybe try removing emmet/html-lsp
 vim.o.shiftwidth = 4 -- Might be replaced with NMAC427/guess-indent.nvim
+vim.o.tabstop = 4
 vim.o.breakindent = true
 
 -- disable the mouse altogether
