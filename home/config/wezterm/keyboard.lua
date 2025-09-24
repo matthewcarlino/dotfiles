@@ -4,6 +4,7 @@ local act = wezterm.action
 local module = {}
 
 function module.apply(config)
+  -- config.enable_csi_u_key_encoding = true
   config.disable_default_key_bindings = true
 
   config.keys = {
@@ -102,6 +103,16 @@ function module.apply(config)
 --    { key = 'w', mods = 'SHIFT|CTRL', action = act.CloseCurrentTab{ confirm = true } },
 --    { key = 'w', mods = 'SUPER', action = act.CloseCurrentTab{ confirm = true } },
   }
+-- Generate Ctrl+Shift+[a-z] mappings
+for i = 1, 26 do
+  local letter = string.char(96 + i) -- 'a' = 97, so 96 + 1 = 97
+  local ascii_code = 64 + i -- 'A' = 65, so 64 + 1 = 65
+  table.insert(config.keys, {
+    key = letter,
+    mods = 'CTRL|SHIFT',
+    action = act.SendString(string.format('\x1b[%d;6u', ascii_code))
+  })
+end
 
   config.key_tables = {
     copy_mode = {
