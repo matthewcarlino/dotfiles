@@ -6,7 +6,7 @@ if [ "$(uname)" == "Darwin" ]; then
 else
     alias ls='LC_COLLATE=C ls -F --group-directories-first --color=auto'
 fi
-alias ll='ls -l'
+alias ll='ls -lh'
 alias la='ls -la'
 
 alias grep='grep --color=auto'
